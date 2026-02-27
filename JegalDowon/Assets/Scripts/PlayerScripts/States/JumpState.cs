@@ -16,6 +16,7 @@ public class JumpState : IState
     public void Enter()
     {
         _player.Jump();
+        _player.ConsumeJump();
     }
 
     public void Exit()

@@ -1,1 +1,3 @@
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://classroom.github.com/online_ide?assignment_repo_id=22871645&assignment_repo_type=AssignmentRepo)
+### [Notion 작업 페이지](https://www.notion.so/312463860b138026824cf9d1d3ee69c2?source=copy_link)
+
+이곳에서 작업 진행 상황 기록 중 입니다.

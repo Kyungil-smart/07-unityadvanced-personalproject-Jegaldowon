@@ -15,9 +15,43 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float _moveSpeed = 5f;
     [SerializeField] float _jumpForce = 12f;
 
+    // 입력값 데드존 
+    // Idle 상태에서
+    [SerializeField] float _moveInputDeadZone = 0.1f;  
 
+    // 애니메이션
+    [SerializeField] Animator _animator;
+
+
+  
+    public void SetSpeed(float speed)
+    {
+        if (_animator == null) return;
+        _animator.SetFloat("Speed", Mathf.Abs(speed));
+    }
+
+    public void SetJumping(bool value)
+    {
+        if (_animator == null) return;
+        _animator.SetBool("isJumping", value);
+    }
+
+    public void SetFalling(bool value)
+    {
+        if (_animator == null) return;
+        _animator.SetBool("isFalling", value);
+    }
+
+
+    // 입력값을 저장하는 프로퍼티
     public float MoveInput { get; private set; }
+    // MoveInput이 일정 값 이상일 때만 이동하도록 하는 프로퍼티
+    public bool HasMoveInput => Mathf.Abs(MoveInput) >= _moveInputDeadZone;
+    // 점프 중인지 여부를 저장하는 프로퍼티
+    public float VelocityY => _rigidbody != null ? _rigidbody.linearVelocity.y : 0f;
+    // 점프 입력이 있는지 여부를 저장하는 프로퍼티
     public bool JumpInput { get; private set; }
+    // 플레이어가 땅에 닿아있는지 여부를 저장하는 프로퍼티
     public bool IsGrounded { get; private set; }
 
     private void Awake()

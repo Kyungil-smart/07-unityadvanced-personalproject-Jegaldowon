@@ -13,7 +13,9 @@ public class MoveState : IState
 
     public void Enter()
     {
-
+        _player.SetSpeed(_player.MoveInput);
+        _player.SetJumping(false);
+        _player.SetFalling(false);
     }
 
     public void Exit()
@@ -26,8 +28,8 @@ public class MoveState : IState
         _player.Move(_player.MoveInput);
 
 
-        // 이동 입력이 없으면 IdleState로 전환
-        if (_player.MoveInput == 0)
+        // 이동 입력이 없으면 IdleState로 전환 (데드존으로 스틱 드리프트 방지)
+        if (!_player.HasMoveInput)
         {
             _stateMachine.ChangeState(new IdleState(_player, _stateMachine));
             return;

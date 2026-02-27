@@ -13,10 +13,15 @@ public class IdleState : IState
 
     public void Enter()
     {
+        _player.SetSpeed(0f);
+        _player.SetJumping(false);
+        _player.SetFalling(false);
+
     }
 
     public void Exit()
     {
+
     }
 
 
@@ -26,7 +31,7 @@ public class IdleState : IState
         _player.Stop();
 
         // 이동 입력이 있으면 MoveState로 전환
-        if (_player.MoveInput != 0)
+        if (_player.HasMoveInput)
         {
             _stateMachine.ChangeState(new MoveState(_player, _stateMachine));
             return;

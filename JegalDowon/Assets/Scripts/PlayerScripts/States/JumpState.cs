@@ -1,5 +1,7 @@
 // 플레이어가 점프할 때의 상태
 
+using UnityEngine;
+
 public class JumpState : IState
 {
     PlayerController _player;
@@ -15,8 +17,11 @@ public class JumpState : IState
     }
     public void Enter()
     {
+        _isGround = false;
         _player.Jump();
         _player.ConsumeJump();
+        _player.SetJumping(true);
+        _player.SetFalling(false);
     }
 
     public void Exit()
@@ -29,17 +34,14 @@ public class JumpState : IState
         _player.Move(_player.MoveInput);
 
         // 공중에 떠있는 동안에는 계속 점프 상태 유지 
+        // 공중에서 Falling 상태로 전환 추가 And 연산자 
         if (!_player.IsGrounded)
-        {
             _isGround = true;
-        }
-
         // 착지하면 Idle 또는 Move로 전환
+        // 
         if (_player.IsGrounded && _isGround)
         {
-            // 이동 입력이 있으면 Move 상태로, 없으면 Idle 상태로 전환 
-            // 아 머리 아프다 크으아각
-            if (_player.MoveInput != 0)
+            if (_player.HasMoveInput)
                 _stateMachine.ChangeState(new MoveState(_player, _stateMachine));
             else
                 _stateMachine.ChangeState(new IdleState(_player, _stateMachine));

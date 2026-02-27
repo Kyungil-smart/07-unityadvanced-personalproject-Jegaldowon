@@ -1777,7 +1777,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 1
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!114 &2020065418
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1826,6 +1826,8 @@ MonoBehaviour:
   _groundCheckDistance: 0.1
   _moveSpeed: 1.5
   _jumpForce: 4
+  _moveInputDeadZone: 0.1
+  _animator: {fileID: 2020065424}
 --- !u!114 &2020065423
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1839,6 +1841,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStateMachine
   _playerController: {fileID: 2020065419}
+--- !u!95 &2020065424 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 7738907795435258548, guid: 27f35b2945ed4bf4aa5eebac283c3137, type: 3}
+  m_PrefabInstance: {fileID: 1462623665}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2654639189646827899
 PrefabInstance:
   m_ObjectHideFlags: 0

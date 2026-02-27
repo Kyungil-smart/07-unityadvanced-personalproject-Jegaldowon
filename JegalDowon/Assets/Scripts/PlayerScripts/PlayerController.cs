@@ -9,8 +9,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] LayerMask _groundLayer;
     [SerializeField] float _groundCheckDistance = 0.1f;
 
-    // Å° ÀÔ·Â µÇ°í ÀÌÁ¦ rb ·Î ¿òÁ÷ÀÌ°Ô
-    private Rigidbody _rigidbody;
+
+    // í‚¤ ì…ë ¥ ë˜ê³  ì´ì œ rb ë¡œ ì›€ì§ì´ê²Œ í•  ê±°ì„
+    private Rigidbody2D _rigidbody;
     [SerializeField] float _moveSpeed = 5f;
     [SerializeField] float _jumpForce = 12f;
 
@@ -23,7 +24,7 @@ public class PlayerController : MonoBehaviour
     {
         _playerInput = GetComponent<PlayerInput>();
         _collider = GetComponent<Collider2D>();
-        _rigidbody = GetComponent<Rigidbody>();
+        _rigidbody = GetComponent<Rigidbody2D>();
     }
 
     private void FixedUpdate()
@@ -68,12 +69,13 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // Á¡ÇÁ°¡ 1¹ø ½ÇÇà µÇ¸é JumpInputÀ» false·Î ¹Ù²ã¼­ Á¡ÇÁ°¡ 1¹ø¸¸ ½ÇÇà 
-    // ´õºí Á¡ÇÁµµ ³Ö¾î? ÀÏ´Ü Á¡ÇÁ´Â 1¹ø¸¸ ÇÏ°Ô ÇÏ°í
-    // ´õºí Á¡ÇÁµµ °¡´ÉÇÏ°Ô ÇÏ°í ½ÍÀ¸¸é JumpInputÀ» false·Î ¹Ù²Ù´Â ½ÃÁ¡À» À½,,,  ¾î¤Ã¤Ã 
-    // Á¡ÇÁ°¡ ³¡³­ ÈÄ·Î ¹Ù²ãÁÖ¸é µÊ
+    // ì í”„ê°€ 1ë²ˆ ì‹¤í–‰ ë˜ë©´ JumpInputì„ falseë¡œ ë°”ê¿”ì„œ ì í”„ê°€ 1ë²ˆë§Œ ì‹¤í–‰ 
+    // ë”ë¸” ì í”„ë„ ë„£ì–´? ì¼ë‹¨ ì í”„ëŠ” 1ë²ˆë§Œ í•˜ê²Œ í•˜ê³ 
+    // ë”ë¸” ì í”„ë„ ê°€ëŠ¥í•˜ê²Œ í•˜ê³  ì‹¶ìœ¼ë©´ JumpInputì„ falseë¡œ ë°”ê¾¸ëŠ” ì‹œì ì„ ìŒ,,,  ì–´ã…“ã…“ 
+    // ì í”„ê°€ ëë‚œ í›„ë¡œ ë°”ê¿”ì£¼ë©´ ë¨
     public void ConsumeJump() => JumpInput = false;
 
+    // Move()ì™€ Jump()ëŠ” Stateì—ì„œ í˜¸ì¶œí•´ì„œ ì‹¤ì œë¡œ í”Œë ˆì´ì–´ë¥¼ ì›€ì§ì´ëŠ” í•¨ìˆ˜
     public void Move(float direction)
     {
         if (_rigidbody == null) return;
@@ -83,8 +85,18 @@ public class PlayerController : MonoBehaviour
     public void Jump()
     {
         if (_rigidbody == null) return;
-        _rigidbody.AddForce(Vector2.up * _jumpForce, ForceMode.Impulse);
+        _rigidbody.AddForce(Vector2.up * _jumpForce, ForceMode2D.Impulse);
     }
+
+    // ë¦¬ì§€ë“œë°”ë”” ì†ë„ë¥¼ 0ìœ¼ë¡œ ë§Œë“¤ê³ 
+    // í”Œë ˆì´ì–´ê°€ ë¯¸ë„ëŸ¬ì§€ëŠ”ê±° ë°©ì§€
+    public void Stop()
+    {
+        if (_rigidbody == null) return;
+        _rigidbody.linearVelocity = new Vector2(0, _rigidbody.linearVelocity.y);
+    }
+
+
 
 
 

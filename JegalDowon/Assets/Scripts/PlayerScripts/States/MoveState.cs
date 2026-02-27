@@ -22,6 +22,10 @@ public class MoveState : IState
 
     public void Update()
     {
+        // 입력 받았으면 실제 이동 해야지 이제 
+        _player.Move(_player.MoveInput);
+
+
         // 이동 입력이 없으면 IdleState로 전환
         if (_player.MoveInput == 0)
         {

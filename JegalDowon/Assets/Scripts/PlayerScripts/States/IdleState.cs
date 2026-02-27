@@ -19,8 +19,12 @@ public class IdleState : IState
     {
     }
 
+
+
     public void Update()
     {
+        _player.Stop();
+
         // 이동 입력이 있으면 MoveState로 전환
         if (_player.MoveInput != 0)
         {

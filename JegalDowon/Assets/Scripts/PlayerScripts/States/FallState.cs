@@ -12,7 +12,7 @@ public class FallState : IState
 
     public void Enter()
     {
-        //  Fall µé¾î¿À¸é Á¡ÇÁ ÇÃ·¡±× Á¤¸®
+        //  Fall ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         _player.SetJumping(false);
         _player.SetFalling(true);
     }
@@ -24,9 +24,17 @@ public class FallState : IState
 
     public void Update()
     {
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô·ï¿½ ï¿½ï¿½ AirAttackStateï¿½ï¿½
+        if (_player.AttackInput)
+        {
+            _player.ConsumeAttack();
+            _stateMachine.ChangeState(new AirAttackState(_player, _stateMachine));
+            return;
+        }
+
         _player.Move(_player.MoveInput);
 
-        //  ÂøÁöÇÏ¸é Idle/Move
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ Idle/Move
         if (_player.IsGrounded)
         {
             if (_player.HasMoveInput)

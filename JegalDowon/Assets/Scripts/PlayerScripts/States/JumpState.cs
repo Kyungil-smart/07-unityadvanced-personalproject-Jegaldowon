@@ -30,7 +30,14 @@ public class JumpState : IState
 
     public void Update()
     {
-        // 점프 중에도 이동 ㄱㄴ
+        // 점프 중 공격 입력 시 AirAttackState로
+        if (_player.AttackInput)
+        {
+            _player.ConsumeAttack();
+            _stateMachine.ChangeState(new AirAttackState(_player, _stateMachine));
+            return;
+        }
+
         _player.Move(_player.MoveInput);
 
         // 공중에 떠있는 동안에는 계속 점프 상태 유지 

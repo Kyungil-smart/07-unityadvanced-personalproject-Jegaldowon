@@ -96,8 +96,75 @@ public class PlayerController : MonoBehaviour
     public float VelocityY => _rigidbody != null ? _rigidbody.linearVelocity.y : 0f;
     // 점프 입력이 있는지 여부를 저장하는 프로퍼티
     public bool JumpInput { get; private set; }
+    // 공격 입력
+    public bool AttackInput { get; private set; }
     // 플레이어가 땅에 닿아있는지 여부를 저장하는 프로퍼티
     public bool IsGrounded { get; private set; }
+
+    // 콤보 인덱스 (0=Attack1, 1=Attack2, 2=Attack3) - 모듈로 순환
+    public int ComboIndex { get; private set; }
+    private const int ComboLength = 3;
+
+    public void ConsumeAttack() => AttackInput = false;
+
+    //다음 콤보로 진행 (Attack1->2->3->1) 이런식으로 진행
+    public void AdvanceCombo() => ComboIndex = (ComboIndex + 1) % ComboLength;
+
+    // 콤보 리셋 (애니메이션 종료 시)
+    public void ResetCombo() => ComboIndex = 0;
+
+    public void SetAttackIndex(int index) => ComboIndex = index;
+
+
+
+    // 공격 기능 추가 할 거임 이제
+    public void TriggerAttack()
+    {
+        if (_animator == null) return;
+        _animator.SetInteger("AttackIndex", ComboIndex);
+        _animator.SetTrigger("DoAttack");
+    }
+
+    public void TriggerAirAttack()
+    {
+        if (_animator == null) return;
+        _animator.SetTrigger("DoAirAttack");
+    }
+
+    public bool IsAirAttackComplete()
+    {
+        if (_animator == null) return true;
+        AnimatorStateInfo info = _animator.GetCurrentAnimatorStateInfo(0);
+        if (!info.IsName("AttackUp"))
+            return true;
+        return info.normalizedTime >= 0.95f;
+    }
+
+    public bool IsInAttackState()
+    {
+        if (_animator == null) return false;
+        AnimatorStateInfo info = _animator.GetCurrentAnimatorStateInfo(0);
+        return info.IsName("Attack1") || info.IsName("Attack2") || info.IsName("Attack3");
+    }
+
+    public bool IsAttackComplete()
+    {
+        if (_animator == null) return true;
+        AnimatorStateInfo info = _animator.GetCurrentAnimatorStateInfo(0);
+        if (!info.IsName("Attack1") && !info.IsName("Attack2") && !info.IsName("Attack3"))
+            return true;
+        return info.normalizedTime >= 0.95f;
+    }
+
+    // 콤보 입력 가능 구간
+    public bool IsInComboWindow()
+    {
+        if (_animator == null) return false;
+        AnimatorStateInfo info = _animator.GetCurrentAnimatorStateInfo(0);
+        if (!info.IsName("Attack1") && !info.IsName("Attack2") && !info.IsName("Attack3"))
+            return false;
+        return info.normalizedTime >= 0.2f && info.normalizedTime <= 0.8f;
+    }
 
     private void Awake()
     {
@@ -137,18 +204,17 @@ public class PlayerController : MonoBehaviour
         {
             case "Move":
                 MoveInput = context.ReadValue<Vector2>().x;
-                Debug.Log($"Move Input: {MoveInput}");
                 break;
 
             case "Jump":
                 if (context.performed)
-                {
                     JumpInput = true;
-                    Debug.Log($"Jump Input: {JumpInput}");
-                }
                 if (context.canceled) JumpInput = false;
+                break;
 
-
+            case "Attack":
+                if (context.performed)
+                    AttackInput = true;
                 break;
         }
     }

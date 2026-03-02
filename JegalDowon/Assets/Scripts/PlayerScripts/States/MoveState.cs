@@ -24,9 +24,16 @@ public class MoveState : IState
 
     public void Update()
     {
-        // 입력 받았으면 실제 이동 해야지 이제 
-        _player.Move(_player.MoveInput);
+        // 공격 입력 (최우선)
+        if (_player.AttackInput)
+        {
+            _player.ConsumeAttack();
+            _player.ResetCombo();
+            _stateMachine.ChangeState(new AttackState(_player, _stateMachine));
+            return;
+        }
 
+        _player.Move(_player.MoveInput);
 
         // 이동 입력이 없으면 IdleState로 전환 (데드존으로 스틱 드리프트 방지)
         if (!_player.HasMoveInput)

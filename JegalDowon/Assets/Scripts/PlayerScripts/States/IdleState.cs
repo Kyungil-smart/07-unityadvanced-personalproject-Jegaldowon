@@ -30,6 +30,15 @@ public class IdleState : IState
     {
         _player.Stop();
 
+        // 공격 입력 (최우선)
+        if (_player.AttackInput)
+        {
+            _player.ConsumeAttack();
+            _player.ResetCombo();
+            _stateMachine.ChangeState(new AttackState(_player, _stateMachine));
+            return;
+        }
+
         // 이동 입력이 있으면
         if (_player.HasMoveInput)
         {

@@ -22,6 +22,9 @@ public class PlayerController : MonoBehaviour
     // 애니메이션
     [SerializeField] Animator _animator;
 
+    // 방향 전환 (Flip X)
+    [SerializeField] SpriteRenderer _spriteRenderer;
+
 
   
     public void SetSpeed(float speed)
@@ -42,6 +45,48 @@ public class PlayerController : MonoBehaviour
         _animator.SetBool("isFalling", value);
     }
 
+    /// <summary>
+    /// 입력 방향에 따라 스프라이트 Flip X 적용 (왼쪽 키 = 왼쪽 바라봄)
+    /// IdleTurn 중에는 애니메이션이 방향을 처리하므로 스킵
+    /// </summary>
+    public void UpdateFacing()
+    {
+        if (_spriteRenderer == null || _isIdleTurnInProgress) return;
+        if (HasMoveInput)
+            _spriteRenderer.flipX = MoveInput < 0;
+    }
+
+    // IdleTurn 관련
+    private bool _isIdleTurnInProgress;
+    private const string IdleTurnStateName = "IdleTurn";
+
+    public bool IsFacingLeft => _spriteRenderer != null && _spriteRenderer.flipX;
+
+    public void BeginIdleTurn(bool turnLeft)
+    {
+        _isIdleTurnInProgress = true;
+        if (_animator != null)
+            _animator.SetTrigger("DoIdleTurn");
+    }
+
+    public void EndIdleTurn()
+    {
+        _isIdleTurnInProgress = false;
+    }
+
+    public bool IsIdleTurnComplete()
+    {
+        if (_animator == null) return true;
+        var stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
+        return stateInfo.IsName(IdleTurnStateName) && stateInfo.normalizedTime >= 0.99f;
+    }
+
+    public void ApplyIdleTurnResult(bool faceLeft)
+    {
+        if (_spriteRenderer != null)
+            _spriteRenderer.flipX = faceLeft;
+    }
+
 
     // 입력값을 저장하는 프로퍼티
     public float MoveInput { get; private set; }
@@ -59,6 +104,8 @@ public class PlayerController : MonoBehaviour
         _playerInput = GetComponent<PlayerInput>();
         _collider = GetComponent<Collider2D>();
         _rigidbody = GetComponent<Rigidbody2D>();
+        if (_spriteRenderer == null)
+            _spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     private void FixedUpdate()

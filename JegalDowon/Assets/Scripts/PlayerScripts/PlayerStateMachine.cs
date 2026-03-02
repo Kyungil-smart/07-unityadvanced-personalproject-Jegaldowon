@@ -21,6 +21,7 @@ public class PlayerStateMachine : MonoBehaviour
 
     private void Update()
     {
+        _playerController.UpdateFacing();
         _stateMachine.Update();
     }
 }

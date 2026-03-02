@@ -584,6 +584,10 @@ PrefabInstance:
       value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 7738907795435258549, guid: 27f35b2945ed4bf4aa5eebac283c3137, type: 3}
+      propertyPath: m_FlipX
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7738907795435258549, guid: 27f35b2945ed4bf4aa5eebac283c3137, type: 3}
       propertyPath: m_SortingOrder
       value: 6
       objectReference: {fileID: 0}
@@ -1828,6 +1832,7 @@ MonoBehaviour:
   _jumpForce: 4
   _moveInputDeadZone: 0.1
   _animator: {fileID: 2020065424}
+  _spriteRenderer: {fileID: 2020065425}
 --- !u!114 &2020065423
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1844,6 +1849,11 @@ MonoBehaviour:
 --- !u!95 &2020065424 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 7738907795435258548, guid: 27f35b2945ed4bf4aa5eebac283c3137, type: 3}
+  m_PrefabInstance: {fileID: 1462623665}
+  m_PrefabAsset: {fileID: 0}
+--- !u!212 &2020065425 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 7738907795435258549, guid: 27f35b2945ed4bf4aa5eebac283c3137, type: 3}
   m_PrefabInstance: {fileID: 1462623665}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2654639189646827899

@@ -4,6 +4,7 @@ public class AirAttackState : IState
 {
     private readonly PlayerController _player;
     private readonly StateMachine _stateMachine;
+    private bool _hasHit;
 
     public AirAttackState(PlayerController player, StateMachine stateMachine)
     {
@@ -13,6 +14,7 @@ public class AirAttackState : IState
 
     public void Enter()
     {
+        _hasHit = false;
         _player.SetJumping(false);
         _player.SetFalling(true);
         _player.ResetCombo(); // 공중에서는 Attack1부터 시작
@@ -26,12 +28,19 @@ public class AirAttackState : IState
 
     public void Update()
     {
+       
+        if (!_hasHit && _player.IsInAttackHitWindow())
+        {
+            _hasHit = _player.TryHitEnemies();
+        }
+
         // 공중 공격 중에도 이동 가능 (에어 컨트롤)
         _player.Move(_player.MoveInput);
 
         // X 키 누를 때마다 다음 공격으로 (지상 콤보와 동일)
         if (_player.AttackInput)
         {
+            _hasHit = false; // 다음 공격도 타격 가능하도록 리셋
             _player.AdvanceCombo();
             _player.TriggerAttack();
             _player.ConsumeAttack();

@@ -10,10 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d1396aeed71984c4380a0821b536195a, type: 3}
-  m_Name: New Enemy Data
+  m_Name: MeleeEnemy
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
-  EnemyName: Boss
-  EnemyDescription: Im King
-  MaxHp: 10000
-  Damage: 1
-  MoveSpeed: 1212
+  EnemyName: Melee Enemy
+  EnemyDescription: Melee Enemy
+  MaxHp: 30
+  Damage: 3
+  ChaseRange: 2.41
+  AttackRange: 0.45
+  MoveSpeed: 0.3
+  PatrolSpeed: 0.2
+  PatrolRadius: 0
+  PatrolDecisionMin: 1
+  PatrolDecisionMax: 3

@@ -39,19 +39,9 @@ public class IdleState : IState
             return;
         }
 
-        // 이동 입력이 있으면
+        // 이동 입력이 있으면 Move로
         if (_player.HasMoveInput)
         {
-            bool inputLeft = _player.MoveInput < 0;
-            bool facingLeft = _player.IsFacingLeft;
-
-            // 반대 방향 입력 시 IdleTurn 애니메이션 재생
-            if (inputLeft != facingLeft)
-            {
-                _stateMachine.ChangeState(new IdleTurnState(_player, _stateMachine, inputLeft));
-                return;
-            }
-
             _stateMachine.ChangeState(new MoveState(_player, _stateMachine));
             return;
         }

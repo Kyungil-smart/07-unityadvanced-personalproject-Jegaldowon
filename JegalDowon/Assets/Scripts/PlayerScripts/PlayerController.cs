@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IDamageable
 {
     private PlayerInput _playerInput;
     private Collider2D _collider;
@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
 
     // 입력값 데드존 
     // Idle 상태에서
-    [SerializeField] float _moveInputDeadZone = 0.1f;  
+    [SerializeField] float _moveInputDeadZone = 0.1f;
 
     // 애니메이션
     [SerializeField] Animator _animator;
@@ -26,7 +26,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] SpriteRenderer _spriteRenderer;
 
 
-  
+
     public void SetSpeed(float speed)
     {
         if (_animator == null) return;
@@ -45,49 +45,15 @@ public class PlayerController : MonoBehaviour
         _animator.SetBool("isFalling", value);
     }
 
-    /// <summary>
-    /// 입력 방향에 따라 스프라이트 Flip X 적용 (왼쪽 키 = 왼쪽 바라봄)
-    /// IdleTurn 중에는 애니메이션이 방향을 처리하므로 스킵
-    /// </summary>
-    public void UpdateFacing()
+    /// <summary>입력 방향에 따라 스프라이트 Flip X 적용</summary>
+    public void UpdateFlip()
     {
-        if (_spriteRenderer == null || _isIdleTurnInProgress) return;
+        if (_spriteRenderer == null) return;
         if (HasMoveInput)
             _spriteRenderer.flipX = MoveInput < 0;
     }
 
-    // IdleTurn 관련
-    private bool _isIdleTurnInProgress;
-    private const string IdleTurnStateName = "IdleTurn";
-
     public bool IsFacingLeft => _spriteRenderer != null && _spriteRenderer.flipX;
-
-    public void BeginIdleTurn(bool turnLeft)
-    {
-        _isIdleTurnInProgress = true;
-        if (_animator != null)
-            _animator.SetTrigger("DoIdleTurn");
-    }
-
-    public void EndIdleTurn()
-    {
-        _isIdleTurnInProgress = false;
-    }
-
-    // 애내이메터가 안먹음;;
-    public bool IsIdleTurnComplete()
-    {
-        if (_animator == null) return true;
-        var stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
-        return stateInfo.IsName(IdleTurnStateName) && stateInfo.normalizedTime >= 0.99f;
-    }
-
-    public void ApplyIdleTurnResult(bool faceLeft)
-    {
-        if (_spriteRenderer != null)
-            _spriteRenderer.flipX = faceLeft;
-    }
-
 
     // 입력값을 저장하는 프로퍼티
     public float MoveInput { get; private set; }
@@ -118,27 +84,50 @@ public class PlayerController : MonoBehaviour
 
 
 
+    [Header("Combat")]
+    [SerializeField] int _maxHp = 6;
+    [SerializeField] PlayerHpUI _hpUI;
+    [SerializeField] float _attackDamage = 1f;
+    [SerializeField] float _attackDamageCombo3 = 2f;
+    [Tooltip("공격 판정 박스 가로(앞뒤)")]
+    [SerializeField] float _attackRange = 1.5f;
+    [Tooltip("공격 판정 박스 세로(위아래)")]
+    [SerializeField] float _attackHeight = 1.2f;
+    [Tooltip("플레이어 중심에서 판정 박스 시작 오프셋")]
+    [SerializeField] float _attackOffsetX = 0.2f;
+    [SerializeField, Range(0f, 1f)] float _hitWindowStart = 0.3f;
+    [SerializeField, Range(0f, 1f)] float _hitWindowEnd = 0.55f;
+
+    public float GetAttackDamage() => ComboIndex == 2 ? _attackDamageCombo3 : _attackDamage;
+
+    /// <summary>앞쪽 박스 범위 내 IDamageable에게 데미지. 플레이어 제외.</summary>
+    public bool TryHitEnemies()
+    {
+        Vector2 pos = transform.position;
+        float dir = IsFacingLeft ? -1f : 1f;
+        Vector2 center = pos + Vector2.right * (dir * (_attackOffsetX + _attackRange * 0.5f));
+        Vector2 size = new Vector2(_attackRange, _attackHeight);
+        float angle = 0f;
+
+        var hits = Physics2D.OverlapBoxAll(center, size, angle);
+        foreach (var hit in hits)
+        {
+            if (hit.gameObject == gameObject) continue;
+            if (hit.TryGetComponent<IDamageable>(out var d))
+            {
+                d.TakeDamage(GetAttackDamage());
+                return true;
+            }
+        }
+        return false;
+    }
+
     // 공격 기능 추가 할 거임 이제
     public void TriggerAttack()
     {
         if (_animator == null) return;
         _animator.SetInteger("AttackIndex", ComboIndex);
         _animator.SetTrigger("DoAttack");
-    }
-
-    public void TriggerAirAttack()
-    {
-        if (_animator == null) return;
-        _animator.SetTrigger("DoAirAttack");
-    }
-
-    public bool IsAirAttackComplete()
-    {
-        if (_animator == null) return true;
-        AnimatorStateInfo info = _animator.GetCurrentAnimatorStateInfo(0);
-        if (!info.IsName("AttackUp"))
-            return true;
-        return info.normalizedTime >= 0.95f;
     }
 
     public bool IsInAttackState()
@@ -155,6 +144,16 @@ public class PlayerController : MonoBehaviour
         if (!info.IsName("Attack1") && !info.IsName("Attack2") && !info.IsName("Attack3"))
             return true;
         return info.normalizedTime >= 0.95f;
+    }
+
+    /// <summary>데미지 들어가는 구간 (애니메이션 중간)</summary>
+    public bool IsInAttackHitWindow()
+    {
+        if (_animator == null) return false;
+        AnimatorStateInfo info = _animator.GetCurrentAnimatorStateInfo(0);
+        if (!info.IsName("Attack1") && !info.IsName("Attack2") && !info.IsName("Attack3"))
+            return false;
+        return info.normalizedTime >= _hitWindowStart && info.normalizedTime <= _hitWindowEnd;
     }
 
     // 콤보 입력 가능 구간
@@ -199,14 +198,21 @@ public class PlayerController : MonoBehaviour
         _playerInput.onActionTriggered -= HandleInput;
     }
 
+    private void Update()
+    {
+        // Move는 Value 타입이라 폴링이 더 안정적 (onActionTriggered는 값 변경 시에만 호출됨)
+        if (_playerInput?.actions != null)
+        {
+            var moveAction = _playerInput.actions["Move"];
+            if (moveAction != null)
+                MoveInput = moveAction.ReadValue<Vector2>().x;
+        }
+    }
+
     private void HandleInput(InputAction.CallbackContext context)
     {
         switch (context.action.name)
         {
-            case "Move":
-                MoveInput = context.ReadValue<Vector2>().x;
-                break;
-
             case "Jump":
                 if (context.performed)
                     JumpInput = true;
@@ -248,4 +254,45 @@ public class PlayerController : MonoBehaviour
         _rigidbody.linearVelocity = new Vector2(0, _rigidbody.linearVelocity.y);
     }
 
+    public int CurrentHp { get; private set; }
+    public bool IsDead => CurrentHp <= 0;
+
+    public void TakeDamage(float damage)
+    {
+        if (IsDead) return;
+
+        CurrentHp = Mathf.Max(0, CurrentHp - Mathf.CeilToInt(damage));
+        _hpUI?.SetHp(CurrentHp);
+
+        if (CurrentHp <= 0)
+        {
+            // TODO: 사망 처리 (애니메이션, 게임오버 등)
+        }
+    }
+
+    private void Start()
+    {
+        CurrentHp = _maxHp;
+        _hpUI?.SetHp(CurrentHp);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        // 공격 판정 박스 (빨강)
+        float dir = (_spriteRenderer != null && _spriteRenderer.flipX) ? -1f : 1f;
+        Vector2 center = (Vector2)transform.position + Vector2.right * (dir * (_attackOffsetX + _attackRange * 0.5f));
+        Gizmos.color = Color.red;
+        Gizmos.matrix = Matrix4x4.TRS(center, Quaternion.identity, Vector3.one);
+        Gizmos.DrawWireCube(Vector3.zero, new Vector3(_attackRange, _attackHeight, 0.01f));
+        Gizmos.matrix = Matrix4x4.identity;
+
+        // 지면 체크 (시안)
+        var col = _collider != null ? _collider : GetComponent<Collider2D>();
+        if (col != null)
+        {
+            Vector2 origin = (Vector2)transform.position + Vector2.down * col.bounds.extents.y;
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawLine(origin, origin + Vector2.down * _groundCheckDistance);
+        }
+    }
 }

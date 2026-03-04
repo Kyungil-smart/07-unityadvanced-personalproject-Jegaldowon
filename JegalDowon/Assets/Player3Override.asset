@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Player3Override
+  m_Controller: {fileID: 9100000, guid: f4479527bd8b11a42b74b3d7df967030, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: 153de50e3d9b82c42b45e3a2a77c6bf5, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: d6bc7dd57e8a86f45895e77469897f89, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: c0f3cfa3930bf134581e99190c8cb8a1, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: bae7ec6d7584cce499cbba40c9639135, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: ae3315f713c8d23488b1c17d6c16ed89, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: b6d14d307dbf7f648893aca18ddb94c9, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 1f5b9fd198badcf4ca501664826fddf1, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: bfd5772f8de9b9347b97d2b023ffeb19, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: b95e5d3fceb4d56448c16f0d31fb0835, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 53f6dfd622950164db13af6d29becc3a, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: be8cbe508bcfdc54f95e5eb91b14b65a, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 49f89275515377048aed752a0f5a685d, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 202d4dd6e6a75b649bfed282c1b0af4e, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 5fa10d251e33e224d8c612b0b5a276b0, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: c6c6c7b197e575d49b1a3abaca750dcf, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: d11b44b722c517043a4b7baaf65305da, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: b9789b9c3ced2e34a96a3973290249b7, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: e0cb831a86f886f4097c452fe8854b72, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: f908a237553f29a439ebf2c495e99774, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: a98ac2f93f70d57489ec8e780620615c, type: 2}

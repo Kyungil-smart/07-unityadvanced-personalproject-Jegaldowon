@@ -1,9 +1,10 @@
-// 공격 콤보 상태 - Attack1 -> Attack2 -> Attack3 -> Attack1 순환
-
 public class AttackState : IState
 {
+
+    // 공격 콤보 상태 - Attack1 -> Attack2 -> Attack3 -> Attack1 순환
     private readonly PlayerController _player;
     private readonly StateMachine _stateMachine;
+    private bool _hasHit;
 
     public AttackState(PlayerController player, StateMachine stateMachine)
     {
@@ -13,6 +14,7 @@ public class AttackState : IState
 
     public void Enter()
     {
+        _hasHit = false;
         _player.TriggerAttack();
         _player.ConsumeAttack();
     }
@@ -23,6 +25,12 @@ public class AttackState : IState
 
     public void Update()
     {
+        // 히트 윈도우에 한 번만 데미지
+        if (!_hasHit && _player.IsInAttackHitWindow())
+        {
+            _hasHit = _player.TryHitEnemies();
+        }
+
         // 공격 중에도 이동 가능
         _player.Move(_player.MoveInput);
 
@@ -38,6 +46,7 @@ public class AttackState : IState
         // X 키 누를 때마다 다음 공격으로
         if (_player.AttackInput)
         {
+            _hasHit = false; // 다음 공격도 타격 가능하도록 리셋
             _player.AdvanceCombo();
             _player.TriggerAttack();
             _player.ConsumeAttack();
@@ -52,6 +61,7 @@ public class AttackState : IState
                 _stateMachine.ChangeState(new MoveState(_player, _stateMachine));
             else
                 _stateMachine.ChangeState(new IdleState(_player, _stateMachine));
+           
         }
     }
 }

@@ -12,7 +12,7 @@ public class FallState : IState
 
     public void Enter()
     {
-        //  Fall ������ ���� �÷��� ����
+        //  Fall 들어오면 점프 플래그 정리
         _player.SetJumping(false);
         _player.SetFalling(true);
     }
@@ -24,7 +24,6 @@ public class FallState : IState
 
     public void Update()
     {
-        // ���� �� ���� �Է� �� AirAttackState��
         if (_player.AttackInput)
         {
             _player.ConsumeAttack();
@@ -34,7 +33,6 @@ public class FallState : IState
 
         _player.Move(_player.MoveInput);
 
-        // �����ϸ� Idle/Move
         if (_player.IsGrounded)
         {
             if (_player.HasMoveInput)

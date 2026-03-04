@@ -74,6 +74,7 @@ public class PlayerController : MonoBehaviour
         _isIdleTurnInProgress = false;
     }
 
+    // 애내이메터가 안먹음;;
     public bool IsIdleTurnComplete()
     {
         if (_animator == null) return true;
@@ -157,7 +158,7 @@ public class PlayerController : MonoBehaviour
     }
 
     // 콤보 입력 가능 구간
-    public bool IsInComboWindow()
+    public bool AttackCombo()
     {
         if (_animator == null) return false;
         AnimatorStateInfo info = _animator.GetCurrentAnimatorStateInfo(0);

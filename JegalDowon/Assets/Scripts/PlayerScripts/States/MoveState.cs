@@ -35,7 +35,7 @@ public class MoveState : IState
 
         _player.Move(_player.MoveInput);
 
-        // 이동 입력이 없으면 IdleState로 전환 (데드존으로 스틱 드리프트 방지)
+        // 이동 입력이 없으면 IdleState로 전환 
         if (!_player.HasMoveInput)
         {
             _stateMachine.ChangeState(new IdleState(_player, _stateMachine));

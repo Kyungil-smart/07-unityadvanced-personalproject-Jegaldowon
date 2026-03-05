@@ -1,10 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-/// <summary>
-/// HP_Slot의 자식(하트 아이콘)을 리스트로 관리.
-/// SetHp(currentHp) 호출 시 남은 HP 개수만큼만 활성화, 나머지는 비활성화.
-/// </summary>
+// HP_Slot의 자식(하트 아이콘)을 리스트로 관리.
+// SetHp(currentHp) 호출 시 남은 HP 개수만큼만 활성화, 나머지는 비활성화.
 public class PlayerHpUI : MonoBehaviour
 {
     [SerializeField] Transform _hpSlot;
@@ -33,7 +31,7 @@ public class PlayerHpUI : MonoBehaviour
         }
     }
 
-    /// <summary>현재 HP에 맞게 아이콘 표시. currentHp 개수만큼만 활성화.</summary>
+    // 현재 HP에 맞게 아이콘 표시. currentHp 개수만큼만 활성화.
     public void SetHp(int currentHp)
     {
         for (int i = 0; i < _hpIcons.Count; i++)

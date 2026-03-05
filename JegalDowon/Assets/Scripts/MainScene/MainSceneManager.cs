@@ -1,8 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// MainScene 싱글톤 매니저. 진입점 및 전역 접근용.
-/// </summary>
 public class MainSceneManager : MonoBehaviour
 {
     [SerializeField] MainScenePresenter _presenter;
@@ -20,25 +17,25 @@ public class MainSceneManager : MonoBehaviour
         _instance = this;
     }
 
-    /// <summary>START 버튼 클릭 시 호출.</summary>
+    // START 버튼 클릭 시 호출.
     public void OnStartClick()
     {
         _presenter?.OnStartClick();
     }
 
-    /// <summary>HowTo 버튼 클릭 시 호출.</summary>
+    // HowTo 버튼 클릭 시 호출.
     public void OnHowToClick()
     {
         _presenter?.OnHowToClick();
     }
 
-    /// <summary>HowToPanel Back 버튼 클릭 시 호출.</summary>
+    // HowToPanel Back 버튼 클릭 시 호출
     public void OnBackClick()
     {
         _presenter?.OnBackClick();
     }
 
-    /// <summary>Exit 버튼 클릭 시 호출.</summary>
+    // Exit 버튼 클릭 시 호출.
     public void OnExitClick()
     {
         _presenter?.OnExitClick();

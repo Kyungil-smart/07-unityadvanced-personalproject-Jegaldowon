@@ -1,8 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// MainScene MVP - View. 패널 표시/숨김 처리.
-/// </summary>
 public class MainSceneView : MonoBehaviour
 {
     [Header("Panels")]
@@ -11,7 +8,7 @@ public class MainSceneView : MonoBehaviour
 
     private void Start()
     {
-        ShowMainMenu(); // 초기: 메인 메뉴 표시
+        ShowMainMenu(); // 메인 메뉴 표시
     }
 
     public void ShowMainMenu()

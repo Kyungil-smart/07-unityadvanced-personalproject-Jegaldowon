@@ -329,7 +329,7 @@ public class PlayerController : MonoBehaviour, IDamageable
             _collider.enabled = value;
     }
 
-    /// <summary>Rigidbody를 Kinematic으로 전환. 사망 시 중력 영향 없음.</summary>
+    // Rigidbody를 Kinematic으로 전환. 사망 시 중력 영향 없음.
     public void SetBodyKinematic(bool kinematic)
     {
         if (_rigidbody == null) return;
@@ -356,7 +356,7 @@ public class PlayerController : MonoBehaviour, IDamageable
             _animator.SetBool("IsDead", true);
     }
 
-    /// <summary>리스폰: 처음 위치로 이동, HP 회복, 사망 상태 해제.</summary>
+    // 리스폰: 처음 위치로 이동, HP 회복, 사망 상태 해제.
     public void Respawn()
     {
         _isDead = false;
@@ -371,8 +371,18 @@ public class PlayerController : MonoBehaviour, IDamageable
         if (_animator != null)
         {
             _animator.SetBool("IsDead", false);
-            _animator.Play("Idle", 0, 0f); // Dead → Idle 강제 전환 (트랜지션 없을 때)
+            _animator.Play("Idle", 0, 0f); // Dead -> Idle 강제 전환 
         }
+        StopAllMotion();
+    }
+
+    // 스폰 위치로만 이동 (HP 변경 없음). 낙하 데미지 등에서 사용.
+    public void TeleportToSpawn()
+    {
+        transform.position = _spawnPosition;
+        SetBodyKinematic(false);
+        if (_collider != null)
+            _collider.enabled = true;
         StopAllMotion();
     }
 
@@ -383,31 +393,37 @@ public class PlayerController : MonoBehaviour, IDamageable
         _hpUI?.SetHp(CurrentHp);
     }
 
-    private void OnDrawGizmosSelected()
-    {
-        // 공격 판정 박스 (빨강)
-        float dir;
-        if (_spriteRenderer != null && _spriteRenderer.flipX)
-            dir = -1f;
-        else
-            dir = 1f;
-        Vector2 center = (Vector2)transform.position + Vector2.right * (dir * (_attackOffsetX + _attackRange * 0.5f));
-        Gizmos.color = Color.red;
-        Gizmos.matrix = Matrix4x4.TRS(center, Quaternion.identity, Vector3.one);
-        Gizmos.DrawWireCube(Vector3.zero, new Vector3(_attackRange, _attackHeight, 0.01f));
-        Gizmos.matrix = Matrix4x4.identity;
+    /*
+ private void OnDrawGizmosSelected()
+ {
+     // 공격 판정 박스 (빨강)
+     float dir;
+     if (_spriteRenderer != null && _spriteRenderer.flipX)
+         dir = -1f;
+     else
+         dir = 1f;
 
-        // 지면 체크 (시안)
-        Collider2D col;
-        if (_collider != null)
-            col = _collider;
-        else
-            col = GetComponent<Collider2D>();
-        if (col != null)
-        {
-            Vector2 origin = (Vector2)transform.position + Vector2.down * col.bounds.extents.y;
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawLine(origin, origin + Vector2.down * _groundCheckDistance);
-        }
-    }
+     Vector2 center = (Vector2)transform.position + 
+                      Vector2.right * (dir * (_attackOffsetX + _attackRange * 0.5f));
+
+     Gizmos.color = Color.red;
+     Gizmos.matrix = Matrix4x4.TRS(center, Quaternion.identity, Vector3.one);
+     Gizmos.DrawWireCube(Vector3.zero, new Vector3(_attackRange, _attackHeight, 0.01f));
+     Gizmos.matrix = Matrix4x4.identity;
+
+     // 지면 체크 (시안)
+     Collider2D col;
+     if (_collider != null)
+         col = _collider;
+     else
+         col = GetComponent<Collider2D>();
+
+     if (col != null)
+     {
+         Vector2 origin = (Vector2)transform.position + Vector2.down * col.bounds.extents.y;
+         Gizmos.color = Color.cyan;
+         Gizmos.DrawLine(origin, origin + Vector2.down * _groundCheckDistance);
+     }
+ }
+ */
 }

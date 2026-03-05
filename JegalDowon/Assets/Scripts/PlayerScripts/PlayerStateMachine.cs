@@ -29,13 +29,13 @@ public class PlayerStateMachine : MonoBehaviour
         {
             _isInDeadState = true;
             _stateMachine.ChangeState(new PlayerDeadState(_playerController, _stateMachine));
-            StartCoroutine(RespawnAfterDeadAnim());
+            StartCoroutine(RespawnDeadAnim());
         }
         _playerController.UpdateFlip();
         _stateMachine.Update();
     }
 
-    private IEnumerator RespawnAfterDeadAnim()
+    private IEnumerator RespawnDeadAnim()
     {
         yield return new WaitForSeconds(_deadAnimDuration);
 

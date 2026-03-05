@@ -2,46 +2,49 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
 
-/// <summary>
-/// ESC 누르면 EscPanel 토글, 게임 정지/재개. Button 누르면 게임 종료.
-/// Input System ESC 액션 사용. PlayerControllers 에셋 할당.
-/// </summary>
 public class GameEscMenu : MonoBehaviour
 {
-    [SerializeField] GameObject _escPanel;
-    [SerializeField] Button _quitButton;
-    [SerializeField] InputActionAsset _inputActions;
+    [Header("UI")]
+    [SerializeField] private GameObject _escPanel;
+    [SerializeField] private Button _quitButton;
+
+    [Header("Input")]
+    [SerializeField] private InputActionAsset _inputActions;
 
     private InputAction _escAction;
     private bool _isOpen;
 
-    private void OnEnable()
-    {
-        if (_inputActions != null)
-        {
-            _escAction = _inputActions.FindActionMap("PlayerActions").FindAction("ESC");
-            _escAction?.Enable();
-        }
-    }
-
-    private void OnDisable()
-    {
-        _escAction?.Disable();
-    }
-
-    private void Start()
+    private void Awake()
     {
         if (_escPanel != null)
             _escPanel.SetActive(false);
 
         if (_quitButton != null)
             _quitButton.onClick.AddListener(OnQuitClick);
+
+        if (_inputActions != null)
+            _escAction = _inputActions.FindAction("PlayerActions/ESC");
     }
 
-    private void Update()
+    private void OnEnable()
     {
-        if (_escAction != null && _escAction.WasPressedThisFrame())
-            Toggle();
+        if (_escAction == null) return;
+
+        _escAction.performed += OnEscPerformed;
+        _escAction.Enable();
+    }
+
+    private void OnDisable()
+    {
+        if (_escAction == null) return;
+
+        _escAction.performed -= OnEscPerformed;
+        _escAction.Disable();
+    }
+
+    private void OnEscPerformed(InputAction.CallbackContext ctx)
+    {
+        Toggle();
     }
 
     private void Toggle()

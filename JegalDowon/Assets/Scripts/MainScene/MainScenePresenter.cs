@@ -1,11 +1,12 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// MainScene MVP - Presenter. 버튼 클릭 처리 및 View/Model 업데이트.
-/// </summary>
 public class MainScenePresenter : MonoBehaviour
 {
+
+    // MVP 로 구현. Presenter는 View와 Model을 연결하는 역할. 버튼 클릭 시 모델 상태 변경, 뷰 업데이트, 씬 전환 등 처리.
+    // Presenter는 
+
     [SerializeField] MainSceneView _view;
     [SerializeField] string _gameSceneName = "GameScene";
 
@@ -16,30 +17,30 @@ public class MainScenePresenter : MonoBehaviour
         _model = new MainSceneModel();
     }
 
-    /// <summary>START 버튼 클릭 시 호출.</summary>
+    // START 버튼 클릭 시 호출
     public void OnStartClick()
     {
         SceneManager.LoadScene(_gameSceneName);
     }
 
-    /// <summary>HowTo 버튼 클릭 시 호출.</summary>
+    //HowTo 버튼 클릭 시 호출.
     public void OnHowToClick()
     {
         _model.CurrentPanel = MainSceneModel.PanelState.HowTo;
         _view?.ShowHowToPanel();
     }
 
-    /// <summary>HowToPanel Back 버튼 클릭 시 호출.</summary>
+    // HowToPanel Back 버튼 클릭 시 호출
     public void OnBackClick()
     {
         _model.CurrentPanel = MainSceneModel.PanelState.MainMenu;
         _view?.ShowMainMenu();
     }
 
-    /// <summary>Exit 버튼 클릭 시 호출.</summary>
+    //Exit 버튼 클릭 시 호출
     public void OnExitClick()
     {
         Debug.Log("[MainScene] Exit 버튼 클릭");
-        // Application.Quit(); // 빌드 시 게임 종료
+        Application.Quit(); // 빌드 시 게임 종료
     }
 }

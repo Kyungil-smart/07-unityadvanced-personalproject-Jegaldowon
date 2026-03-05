@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>비행 몬스터 패트롤. 수직 진동하며 대기, 플레이어 감지 시 FlyChase로.</summary>
+// 비행 몬스터 패트롤. 수직 진동하며 대기, 플레이어 감지 시 FlyChase로.
 public class EnemyFlyPatrolState : IState
 {
     private readonly EnemyStateManager _enemy;

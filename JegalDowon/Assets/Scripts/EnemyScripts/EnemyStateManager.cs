@@ -15,7 +15,7 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
     [SerializeField] Animator _animator;
     [SerializeField] SpriteRenderer _spriteRenderer;
     [Tooltip("스프라이트 방향이 반대로 보이면 체크")]
-    [SerializeField] bool _invertFacing;
+    [SerializeField] bool _invertFlipX;
 
     [Header("사망")]
     [Tooltip("Dead 애니메이션 재생 시간(초) 후 Destroy")]
@@ -69,106 +69,18 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
         }
     }
 
-    public float ChaseRange
-    {
-        get
-        {
-            if (_enemyData != null)
-            {
-                return _enemyData.ChaseRange;
-            }
-            else
-            {
-                return 5f;
-            }
-        }
-    }
-    public float AttackRange
-    {
-        get
-        {
-            if (_enemyData != null)
-            {
-                return _enemyData.AttackRange;
-            }
-            else
-            {
-                return 1.5f;
-            }
-        }
-    }
-    public float Speed
-    {
-        get
-        {
-            if (_enemyData != null)
-            {
-                return _enemyData.MoveSpeed;
-            }
-            else
-            {
-                return 3f;
-            }
-        }
-    }
-    public float PatrolSpeed
-    {
-        get
-        {
-            if (_enemyData != null)
-            {
-                return _enemyData.PatrolSpeed;
-            }
-            else
-            {
-                return 1.5f;
-            }
-        }
-    }
-    public float PatrolMin
-    {
-        get
-        {
-            if (_enemyData != null)
-            {
-                return _enemyData.PatrolMin;
-            }
-            else
-            {
-                return 1f;
-            }
-        }
-    }
+    public float ChaseRange => _enemyData != null ? _enemyData.ChaseRange : 5f;
+    public float AttackRange => _enemyData != null ? _enemyData.AttackRange : 1.5f;
+    public float Speed => _enemyData != null ? _enemyData.MoveSpeed : 3f;
+    public float PatrolSpeed => _enemyData != null ? _enemyData.PatrolSpeed : 1.5f;
+    public float PatrolMin => _enemyData != null ? _enemyData.PatrolMin : 1f;
+    public float PatrolMax => _enemyData != null ? _enemyData.PatrolMax : 3f;
+    public float PatrolRadius => _enemyData != null ? _enemyData.PatrolRadius : 0f;
+    public float Damage => _enemyData != null ? _enemyData.Damage : 1f;
 
-    public float PatrolMax
-    {
-        get
-        {
-            if (_enemyData != null)
-            {
-                return _enemyData.PatrolMax;
-            }
-            else
-            {
-                return 3f;
-            }
-        }
-    }
 
-    public float PatrolRadius
-    {
-        get
-        {
-            if (_enemyData != null)
-            {
-                return _enemyData.PatrolRadius;
-            }
-            else
-            {
-                return 0f;
-            }
-        }
-    }
+
+
     public void SetAnimatorSpeed(float speed)
     {
         if (_animator != null && _hasSpeedParam)
@@ -199,7 +111,7 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
     public void SetFacing(bool faceLeft)
     {
         if (_spriteRenderer != null)
-            if (_invertFacing)
+            if (_invertFlipX)
                 _spriteRenderer.flipX = !faceLeft;
             else
                 _spriteRenderer.flipX = faceLeft;
@@ -220,15 +132,7 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
         return info.normalizedTime >= 0.15f && info.normalizedTime <= 0.85f;
     }
 
-    public float Damage
-    {
-        get
-        {
-            if (_enemyData != null)
-                return _enemyData.Damage;
-            return 1f;
-        }
-    }
+
 
     void Start()
     {
@@ -271,7 +175,7 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
                 _rigidbody.linearVelocity = Vector2.zero;
             }
             SetDead(true);
-            StartCoroutine(PlayDeadAndDestroy());
+            StartCoroutine(DeadToDestroy());
         }
         // 죽을 때 까지(?) 맞는 애니메이션은 계속 나와야 함 
         else
@@ -280,7 +184,7 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
         }
     }
 
-    IEnumerator PlayDeadAndDestroy()
+    IEnumerator DeadToDestroy()
     {
         if (_stateMachine != null)
             _stateMachine.ChangeState(new EnemyDeadState(this, _stateMachine));
@@ -346,47 +250,47 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
 
 
     // 다 만들었으면 여기 지울 것
-    private void OnDrawGizmosSelected()
-    {
-        float chaseR, attackR, patrolR;
-        if (_enemyData != null)
-        {
-            chaseR = _enemyData.ChaseRange;
-            attackR = _enemyData.AttackRange;
-            patrolR = _enemyData.PatrolRadius;
-        }
-        else
-        {
-            chaseR = 5f;
-            attackR = 1.5f;
-            patrolR = 0f;
-        }
-
-        // 추적 범위는 노랑으라 하고
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, chaseR);
-        // 공격 범위는 빨강 으로 하고
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackR);
-        // 패트롤 범위 (초록, 반경 > 0일 때만)
-        if (patrolR > 0)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawWireSphere(transform.position, patrolR);
-        }
-        // 낭떨어지 감지 
-        Gizmos.color = Color.cyan;
-        Collider2D col;
-        if (_collider != null)
-            col = _collider;
-        else
-            col = GetComponent<Collider2D>();
-        float footY;
-        if (col != null)
-            footY = transform.position.y - col.bounds.extents.y;
-        else
-            footY = transform.position.y;
-        Gizmos.DrawLine(new Vector3(transform.position.x + _edgeCheckDistance, footY), new Vector3(transform.position.x + _edgeCheckDistance, footY - _edgeCheckDown));
-        Gizmos.DrawLine(new Vector3(transform.position.x - _edgeCheckDistance, footY), new Vector3(transform.position.x - _edgeCheckDistance, footY - _edgeCheckDown));
-    }
+    // private void OnDrawGizmosSelected()
+    // {
+    //     float chaseR, attackR, patrolR;
+    //     if (_enemyData != null)
+    //     {
+    //         chaseR = _enemyData.ChaseRange;
+    //         attackR = _enemyData.AttackRange;
+    //         patrolR = _enemyData.PatrolRadius;
+    //     }
+    //     else
+    //     {
+    //         chaseR = 5f;
+    //         attackR = 1.5f;
+    //         patrolR = 0f;
+    //     }
+    // 
+    //     // 추적 범위는 노랑으라 하고
+    //     Gizmos.color = Color.yellow;
+    //     Gizmos.DrawWireSphere(transform.position, chaseR);
+    //     // 공격 범위는 빨강 으로 하고
+    //     Gizmos.color = Color.red;
+    //     Gizmos.DrawWireSphere(transform.position, attackR);
+    //     // 패트롤 범위 (초록, 반경 > 0일 때만)
+    //     if (patrolR > 0)
+    //     {
+    //         Gizmos.color = Color.green;
+    //         Gizmos.DrawWireSphere(transform.position, patrolR);
+    //     }
+    //     // 낭떨어지 감지 
+    //     Gizmos.color = Color.cyan;
+    //     Collider2D col;
+    //     if (_collider != null)
+    //         col = _collider;
+    //     else
+    //         col = GetComponent<Collider2D>();
+    //     float footY;
+    //     if (col != null)
+    //         footY = transform.position.y - col.bounds.extents.y;
+    //     else
+    //         footY = transform.position.y;
+    //     Gizmos.DrawLine(new Vector3(transform.position.x + _edgeCheckDistance, footY), new Vector3(transform.position.x + _edgeCheckDistance, footY - _edgeCheckDown));
+    //     Gizmos.DrawLine(new Vector3(transform.position.x - _edgeCheckDistance, footY), new Vector3(transform.position.x - _edgeCheckDistance, footY - _edgeCheckDown));
+    // }
 }

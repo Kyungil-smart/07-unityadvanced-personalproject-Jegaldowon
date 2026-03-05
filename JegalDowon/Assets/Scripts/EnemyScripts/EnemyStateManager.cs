@@ -20,6 +20,8 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
     [Header("사망")]
     [Tooltip("Dead 애니메이션 재생 시간(초) 후 Destroy")]
     [SerializeField] float _deadAnimDuration = 1f;
+    [Tooltip("이 적 사망 시 표시할 패널 (예: CreditPanel). FlyinRiderEnemy에 CreditPanel 할당")]
+    [SerializeField] GameObject _showPanelOnDeath;
 
     [Header("낭떨어지 감지")]
     [SerializeField] LayerMask _groundLayer;
@@ -33,6 +35,10 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
     private StateMachine _stateMachine;
     private Vector3 _patrolOrigin;
     private bool _isDead;
+    private bool _hasSpeedParam;
+
+    public FlyData FlyData { get; private set; }
+    public float StartY { get; private set; }
 
     public float CurrentHp { get; private set; }
     public bool IsDead => _isDead;
@@ -119,13 +125,13 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
             }
         }
     }
-    public float PatrolDecisionMin
+    public float PatrolMin
     {
         get
         {
             if (_enemyData != null)
             {
-                return _enemyData.PatrolDecisionMin;
+                return _enemyData.PatrolMin;
             }
             else
             {
@@ -134,13 +140,13 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
         }
     }
 
-    public float PatrolDecisionMax
+    public float PatrolMax
     {
         get
         {
             if (_enemyData != null)
             {
-                return _enemyData.PatrolDecisionMax;
+                return _enemyData.PatrolMax;
             }
             else
             {
@@ -165,7 +171,7 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
     }
     public void SetAnimatorSpeed(float speed)
     {
-        if (_animator != null)
+        if (_animator != null && _hasSpeedParam)
             _animator.SetFloat("Speed", speed);
     }
 
@@ -177,8 +183,11 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
 
     public void TriggerHitAnim()
     {
-        if (_animator != null)
-            _animator.SetTrigger("DoHit");
+        if (_animator == null) return;
+        // Hit 애니메이션 재생 중이면 재트리거 안 함 (부들부들 방지)
+        if (_animator.GetCurrentAnimatorStateInfo(0).IsName("Hit"))
+            return;
+        _animator.SetTrigger("DoHit");
     }
 
     public void SetDead(bool value)
@@ -190,7 +199,10 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
     public void SetFacing(bool faceLeft)
     {
         if (_spriteRenderer != null)
-            _spriteRenderer.flipX = _invertFacing ? !faceLeft : faceLeft;
+            if (_invertFacing)
+                _spriteRenderer.flipX = !faceLeft;
+            else
+                _spriteRenderer.flipX = faceLeft;
     }
 
     public bool IsInAttackAnim()
@@ -208,14 +220,38 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
         return info.normalizedTime >= 0.15f && info.normalizedTime <= 0.85f;
     }
 
-    public float Damage => _enemyData != null ? _enemyData.Damage : 1f;
+    public float Damage
+    {
+        get
+        {
+            if (_enemyData != null)
+                return _enemyData.Damage;
+            return 1f;
+        }
+    }
 
     void Start()
     {
         _patrolOrigin = transform.position;
-        CurrentHp = _enemyData != null ? _enemyData.MaxHp : 10f;
+        StartY = transform.position.y;
+        FlyData = _enemyData as FlyData;
+
+        if (_animator != null)
+            foreach (var p in _animator.parameters)
+                if (p.name == "Speed") { _hasSpeedParam = true; break; }
+
+        if (_enemyData != null)
+            CurrentHp = _enemyData.MaxHp;
+        else
+            CurrentHp = 10f;
+        if (_rigidbody != null && _enemyData != null)
+            _rigidbody.mass = _enemyData.Mass;
         _stateMachine = new StateMachine();
-        _stateMachine.ChangeState(new EnemyPatrolState(this, _stateMachine));
+
+        if (FlyData != null)
+            _stateMachine.ChangeState(new EnemyFlyPatrolState(this, _stateMachine));
+        else
+            _stateMachine.ChangeState(new EnemyPatrolState(this, _stateMachine));
     }
 
     // IDamageable 인터페이스 구현 
@@ -250,6 +286,10 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
             _stateMachine.ChangeState(new EnemyDeadState(this, _stateMachine));
 
         yield return new WaitForSeconds(_deadAnimDuration);
+
+        if (_showPanelOnDeath != null)
+            _showPanelOnDeath.SetActive(true);
+
         Destroy(gameObject);
     }
 
@@ -308,9 +348,19 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
     // 다 만들었으면 여기 지울 것
     private void OnDrawGizmosSelected()
     {
-        float chaseR = _enemyData != null ? _enemyData.ChaseRange : 5f;
-        float attackR = _enemyData != null ? _enemyData.AttackRange : 1.5f;
-        float patrolR = _enemyData != null ? _enemyData.PatrolRadius : 0f;
+        float chaseR, attackR, patrolR;
+        if (_enemyData != null)
+        {
+            chaseR = _enemyData.ChaseRange;
+            attackR = _enemyData.AttackRange;
+            patrolR = _enemyData.PatrolRadius;
+        }
+        else
+        {
+            chaseR = 5f;
+            attackR = 1.5f;
+            patrolR = 0f;
+        }
 
         // 추적 범위는 노랑으라 하고
         Gizmos.color = Color.yellow;
@@ -324,10 +374,18 @@ public class EnemyStateManager : MonoBehaviour, IDamageable
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(transform.position, patrolR);
         }
-        // 낭떨어지 감지 (시안)
+        // 낭떨어지 감지 
         Gizmos.color = Color.cyan;
-        var col = _collider != null ? _collider : GetComponent<Collider2D>();
-        float footY = col != null ? transform.position.y - col.bounds.extents.y : transform.position.y;
+        Collider2D col;
+        if (_collider != null)
+            col = _collider;
+        else
+            col = GetComponent<Collider2D>();
+        float footY;
+        if (col != null)
+            footY = transform.position.y - col.bounds.extents.y;
+        else
+            footY = transform.position.y;
         Gizmos.DrawLine(new Vector3(transform.position.x + _edgeCheckDistance, footY), new Vector3(transform.position.x + _edgeCheckDistance, footY - _edgeCheckDown));
         Gizmos.DrawLine(new Vector3(transform.position.x - _edgeCheckDistance, footY), new Vector3(transform.position.x - _edgeCheckDistance, footY - _edgeCheckDown));
     }

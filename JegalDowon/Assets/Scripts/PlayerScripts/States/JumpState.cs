@@ -1,8 +1,6 @@
-// 플레이어가 점프할 때의 상태
-
 using UnityEngine;
 
-public class JumpState : IState
+public class JumpState : IState // 플레이어가 점프할 때의 상태
 {
     PlayerController _player;
     StateMachine _stateMachine;

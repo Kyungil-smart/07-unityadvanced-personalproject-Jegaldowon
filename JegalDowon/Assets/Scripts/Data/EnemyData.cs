@@ -11,6 +11,8 @@ public class EnemyData : ScriptableObject
     [Header("전투")]
     public float MaxHp = 10f;
     public float Damage = 1f;
+    [Tooltip("Rigidbody2D Mass. 높을수록 플레이어에게 밀리지 않음")]
+    public float Mass = 100f;
 
     [Header("사거리")]
     [Tooltip("플레이어 감지 시 추적 시작 거리")]
@@ -28,7 +30,7 @@ public class EnemyData : ScriptableObject
 
     [Header("패트롤 행동")]
     [Tooltip("멈출지/움직일지 재결정 최소 간격(초)")]
-    public float PatrolDecisionMin = 1f;
+    public float PatrolMin = 1f;
     [Tooltip("멈출지/움직일지 재결정 최대 간격(초)")]
-    public float PatrolDecisionMax = 3f;
+    public float PatrolMax = 3f;
 }

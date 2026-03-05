@@ -15,11 +15,12 @@ MonoBehaviour:
   EnemyName: Melee Enemy
   EnemyDescription: Melee Enemy
   MaxHp: 30
-  Damage: 3
-  ChaseRange: 2.41
+  Damage: 1
+  Mass: 100
+  ChaseRange: 0.91
   AttackRange: 0.45
   MoveSpeed: 0.3
   PatrolSpeed: 0.2
   PatrolRadius: 0
-  PatrolDecisionMin: 1
-  PatrolDecisionMax: 3
+  PatrolMin: 1
+  PatrolMax: 3

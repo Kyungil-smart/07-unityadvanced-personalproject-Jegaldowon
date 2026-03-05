@@ -1,11 +1,12 @@
 using UnityEngine;
 
-/// <summary>
-/// 필드에서 돌아다니다가 플레이어가 범위 안 들어오면 Chase로.
-/// 멈출지 움직일지 랜덤 결정.
-/// </summary>
 public class EnemyPatrolState : IState
 {
+
+    // 필드에서 돌아다니다가 플레이어가 범위 안 들어오면 Chase로
+    // 멈출지 움직일지 랜덤 결정.
+
+
     private readonly EnemyStateManager _enemy;
     private readonly StateMachine _stateMachine;
 
@@ -67,12 +68,17 @@ public class EnemyPatrolState : IState
         _enemy.transform.position = target;
     }
 
+    // 랜덤으로 멈출지 움직일지 결정
+
     private void DecideNextAction()
     {
         _isMoving = Random.value > 0.5f;
         if (_isMoving)
-            _moveDirection = Random.value > 0.5f ? 1f : -1f;
+            if (Random.value > 0.5f)
+                _moveDirection = 1f;
+            else
+                _moveDirection = -1f;
 
-        _nextDecisionTime = Time.time + Random.Range(_enemy.PatrolDecisionMin, _enemy.PatrolDecisionMax);
+        _nextDecisionTime = Time.time + Random.Range(_enemy.PatrolMin, _enemy.PatrolMax);
     }
 }

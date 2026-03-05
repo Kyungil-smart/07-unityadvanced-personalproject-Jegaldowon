@@ -1,9 +1,10 @@
 using UnityEngine;
 
-/// <summary>
-/// 사망 상태. 애니메이션 재생만 하고 아무것도 안 함.
-/// 해결 완료
-/// </summary>
+// 사망 상태. 애니메이션 재생만 하고 아무것도 안 함.
+//
+//
+// 해결 완료
+
 public class EnemyDeadState : IState
 {
     private readonly EnemyStateManager _enemy;

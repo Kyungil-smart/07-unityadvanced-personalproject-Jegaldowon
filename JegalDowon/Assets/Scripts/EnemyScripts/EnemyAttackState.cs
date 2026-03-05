@@ -24,14 +24,25 @@ public class EnemyAttackState : IState
 
     public void Update()
     {
+        if (_enemy.FlyData != null)
+        {
+            float flyY = _enemy.StartY + Mathf.Sin(Time.time * _enemy.FlyData.FlySpeed) * _enemy.FlyData.FlyRange;
+            Vector3 pos = _enemy.transform.position;
+            pos.y = flyY;
+            _enemy.transform.position = pos;
+        }
+
         if (!_enemy.IsPlayerRange(_enemy.AttackRange))
         {
-            _stateMachine.ChangeState(new EnemyChaseState(_enemy, _stateMachine));
+            if (_enemy.FlyData != null)
+                _stateMachine.ChangeState(new EnemyFlyChaseState(_enemy, _stateMachine));
+            else
+                _stateMachine.ChangeState(new EnemyChaseState(_enemy, _stateMachine));
             return;
         }
 
-        // 공격 애니메이션 중 플레이어에게 데미지 (한 번만)
-        if (_enemy.IsInAttackAnim() && !_hasDealtDamage)
+        // 공격 애니메이션 타격 구간에 플레이어에게 데미지 (공격당 1회)
+        if (_enemy.IsInAttackHitWindow() && !_hasDealtDamage)
         {
             _hasDealtDamage = true;
             if (_enemy.Player != null)
@@ -52,6 +63,7 @@ public class EnemyAttackState : IState
         if (!_triggeredNext)
         {
             _triggeredNext = true;
+            _hasDealtDamage = false; // 다음 공격에서 데미지 가능하도록 리셋
             _enemy.TriggerAttackAnim();
         }
     }

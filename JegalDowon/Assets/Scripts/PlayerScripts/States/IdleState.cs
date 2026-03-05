@@ -1,6 +1,6 @@
-// 플레이어가 가만히 있을 때의 상태
+using UnityEngine;
 
-public class IdleState : IState
+public class IdleState : IState // 플레이어가 가만히 있을 때의 상태
 {
     PlayerController _player;
     StateMachine _stateMachine;
@@ -23,8 +23,6 @@ public class IdleState : IState
     {
 
     }
-
-
 
     public void Update()
     {

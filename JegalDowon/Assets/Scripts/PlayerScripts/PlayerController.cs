@@ -45,7 +45,7 @@ public class PlayerController : MonoBehaviour, IDamageable
         _animator.SetBool("isFalling", value);
     }
 
-    /// <summary>입력 방향에 따라 스프라이트 Flip X 적용</summary>
+    // 입력 방향에 따라 스프라이트 Flip X 적용 
     public void UpdateFlip()
     {
         if (_spriteRenderer == null) return;
@@ -60,7 +60,14 @@ public class PlayerController : MonoBehaviour, IDamageable
     // MoveInput이 일정 값 이상일 때만 이동하도록 하는 프로퍼티
     public bool HasMoveInput => Mathf.Abs(MoveInput) >= _moveInputDeadZone;
     // 점프 중인지 여부를 저장하는 프로퍼티
-    public float VelocityY => _rigidbody != null ? _rigidbody.linearVelocity.y : 0f;
+    public float VelocityY
+    {
+        get
+        {
+            if (_rigidbody == null) return 0f;
+            return _rigidbody.linearVelocity.y;
+        }
+    }
     // 점프 입력이 있는지 여부를 저장하는 프로퍼티
     public bool JumpInput { get; private set; }
     // 공격 입력
@@ -80,10 +87,6 @@ public class PlayerController : MonoBehaviour, IDamageable
     // 콤보 리셋 (애니메이션 종료 시)
     public void ResetCombo() => ComboIndex = 0;
 
-    public void SetAttackIndex(int index) => ComboIndex = index;
-
-
-
     [Header("Combat")]
     [SerializeField] int _maxHp = 6;
     [SerializeField] PlayerHpUI _hpUI;
@@ -98,13 +101,28 @@ public class PlayerController : MonoBehaviour, IDamageable
     [SerializeField, Range(0f, 1f)] float _hitWindowStart = 0.3f;
     [SerializeField, Range(0f, 1f)] float _hitWindowEnd = 0.55f;
 
-    public float GetAttackDamage() => ComboIndex == 2 ? _attackDamageCombo3 : _attackDamage;
+    private bool _isDead;
+    private bool _inputLocked; // 사망하면 입력 잠금
+    private Vector3 _spawnPosition;
 
-    /// <summary>앞쪽 박스 범위 내 IDamageable에게 데미지. 플레이어 제외.</summary>
+
+
+    public float GetAttackDamage()
+    {
+        if (ComboIndex == 2)
+            return _attackDamageCombo3;
+        return _attackDamage;
+    }
+
+    // 앞쪽 박스 범위 내 IDamageable에게 데미지. 플레이어 제외.
     public bool TryHitEnemies()
     {
         Vector2 pos = transform.position;
-        float dir = IsFacingLeft ? -1f : 1f;
+        float dir;
+        if (IsFacingLeft)
+            dir = -1f;
+        else
+            dir = 1f;
         Vector2 center = pos + Vector2.right * (dir * (_attackOffsetX + _attackRange * 0.5f));
         Vector2 size = new Vector2(_attackRange, _attackHeight);
         float angle = 0f;
@@ -130,23 +148,24 @@ public class PlayerController : MonoBehaviour, IDamageable
         _animator.SetTrigger("DoAttack");
     }
 
-    public bool IsInAttackState()
+    // 피격 시 Hit 애니메이션 재생
+    public void TriggerHitAnim()
     {
-        if (_animator == null) return false;
-        AnimatorStateInfo info = _animator.GetCurrentAnimatorStateInfo(0);
-        return info.IsName("Attack1") || info.IsName("Attack2") || info.IsName("Attack3");
+        if (_animator != null)
+            _animator.SetTrigger("DoHit");
     }
 
     public bool IsAttackComplete()
     {
         if (_animator == null) return true;
         AnimatorStateInfo info = _animator.GetCurrentAnimatorStateInfo(0);
+
         if (!info.IsName("Attack1") && !info.IsName("Attack2") && !info.IsName("Attack3"))
             return true;
         return info.normalizedTime >= 0.95f;
     }
 
-    /// <summary>데미지 들어가는 구간 (애니메이션 중간)</summary>
+    // 데미지 들어가는 구간
     public bool IsInAttackHitWindow()
     {
         if (_animator == null) return false;
@@ -154,16 +173,6 @@ public class PlayerController : MonoBehaviour, IDamageable
         if (!info.IsName("Attack1") && !info.IsName("Attack2") && !info.IsName("Attack3"))
             return false;
         return info.normalizedTime >= _hitWindowStart && info.normalizedTime <= _hitWindowEnd;
-    }
-
-    // 콤보 입력 가능 구간
-    public bool AttackCombo()
-    {
-        if (_animator == null) return false;
-        AnimatorStateInfo info = _animator.GetCurrentAnimatorStateInfo(0);
-        if (!info.IsName("Attack1") && !info.IsName("Attack2") && !info.IsName("Attack3"))
-            return false;
-        return info.normalizedTime >= 0.2f && info.normalizedTime <= 0.8f;
     }
 
     private void Awake()
@@ -180,6 +189,7 @@ public class PlayerController : MonoBehaviour, IDamageable
         GroundCheck();
     }
 
+    // 바닥 확인
     private void GroundCheck()
     {
         if (_collider == null) return;
@@ -200,6 +210,9 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     private void Update()
     {
+        // Dead 면 입력 잠금
+        if (_isDead || _inputLocked) return;
+
         // Move는 Value 타입이라 폴링이 더 안정적 (onActionTriggered는 값 변경 시에만 호출됨)
         if (_playerInput?.actions != null)
         {
@@ -211,6 +224,8 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     private void HandleInput(InputAction.CallbackContext context)
     {
+        if (_isDead || _inputLocked) return;
+
         switch (context.action.name)
         {
             case "Jump":
@@ -236,12 +251,14 @@ public class PlayerController : MonoBehaviour, IDamageable
     // Move()와 Jump()는 State에서 호출해서 실제로 플레이어를 움직이는 함수
     public void Move(float direction)
     {
+        if (_isDead || _inputLocked) return;
         if (_rigidbody == null) return;
         _rigidbody.linearVelocity = new Vector2(direction * _moveSpeed, _rigidbody.linearVelocity.y);
     }
 
     public void Jump()
     {
+        if (_isDead || _inputLocked) return;
         if (_rigidbody == null) return;
         _rigidbody.AddForce(Vector2.up * _jumpForce, ForceMode2D.Impulse);
     }
@@ -255,7 +272,14 @@ public class PlayerController : MonoBehaviour, IDamageable
     }
 
     public int CurrentHp { get; private set; }
-    public bool IsDead => CurrentHp <= 0;
+    public bool IsDead
+    {
+        get
+        {
+            return CurrentHp <= 0;
+        }
+    }
+
 
     public void TakeDamage(float damage)
     {
@@ -266,12 +290,95 @@ public class PlayerController : MonoBehaviour, IDamageable
 
         if (CurrentHp <= 0)
         {
-            // TODO: 사망 처리 (애니메이션, 게임오버 등)
+            Die();
         }
+        else
+        {
+            TriggerHitAnim();
+        }
+    }
+
+    public void SetDeadAnim(bool value)
+    {
+        if (_animator != null)
+            _animator.SetBool("IsDead", value);
+    }
+
+    public void LockInput(bool value)
+    {
+        _inputLocked = value;
+
+        if (value)
+        {
+            MoveInput = 0;
+            JumpInput = false;
+            AttackInput = false;
+        }
+    }
+
+    public void StopAllMotion()
+    {
+        if (_rigidbody == null) return;
+
+        _rigidbody.linearVelocity = Vector2.zero;
+    }
+
+    public void SetColliderEnabled(bool value)
+    {
+        if (_collider != null)
+            _collider.enabled = value;
+    }
+
+    /// <summary>Rigidbody를 Kinematic으로 전환. 사망 시 중력 영향 없음.</summary>
+    public void SetBodyKinematic(bool kinematic)
+    {
+        if (_rigidbody == null) return;
+        if (kinematic)
+            _rigidbody.bodyType = RigidbodyType2D.Kinematic;
+        else
+            _rigidbody.bodyType = RigidbodyType2D.Dynamic;
+        if (kinematic)
+            _rigidbody.linearVelocity = Vector2.zero;
+    }
+
+    private void Die()
+    {
+        if (_isDead) return;
+
+        _isDead = true;
+        _inputLocked = true;
+
+        SetBodyKinematic(true);
+        if (_collider != null)
+            _collider.enabled = false;
+
+        if (_animator != null)
+            _animator.SetBool("IsDead", true);
+    }
+
+    /// <summary>리스폰: 처음 위치로 이동, HP 회복, 사망 상태 해제.</summary>
+    public void Respawn()
+    {
+        _isDead = false;
+        _inputLocked = false;
+        CurrentHp = _maxHp;
+        _hpUI?.SetHp(CurrentHp);
+
+        transform.position = _spawnPosition;
+        SetBodyKinematic(false);
+        if (_collider != null)
+            _collider.enabled = true;
+        if (_animator != null)
+        {
+            _animator.SetBool("IsDead", false);
+            _animator.Play("Idle", 0, 0f); // Dead → Idle 강제 전환 (트랜지션 없을 때)
+        }
+        StopAllMotion();
     }
 
     private void Start()
     {
+        _spawnPosition = transform.position;
         CurrentHp = _maxHp;
         _hpUI?.SetHp(CurrentHp);
     }
@@ -279,7 +386,11 @@ public class PlayerController : MonoBehaviour, IDamageable
     private void OnDrawGizmosSelected()
     {
         // 공격 판정 박스 (빨강)
-        float dir = (_spriteRenderer != null && _spriteRenderer.flipX) ? -1f : 1f;
+        float dir;
+        if (_spriteRenderer != null && _spriteRenderer.flipX)
+            dir = -1f;
+        else
+            dir = 1f;
         Vector2 center = (Vector2)transform.position + Vector2.right * (dir * (_attackOffsetX + _attackRange * 0.5f));
         Gizmos.color = Color.red;
         Gizmos.matrix = Matrix4x4.TRS(center, Quaternion.identity, Vector3.one);
@@ -287,7 +398,11 @@ public class PlayerController : MonoBehaviour, IDamageable
         Gizmos.matrix = Matrix4x4.identity;
 
         // 지면 체크 (시안)
-        var col = _collider != null ? _collider : GetComponent<Collider2D>();
+        Collider2D col;
+        if (_collider != null)
+            col = _collider;
+        else
+            col = GetComponent<Collider2D>();
         if (col != null)
         {
             Vector2 origin = (Vector2)transform.position + Vector2.down * col.bounds.extents.y;

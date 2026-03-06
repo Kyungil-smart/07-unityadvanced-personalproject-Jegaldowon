@@ -1,5 +1,6 @@
 # 가시숲의 아이
-![Uploading image.png…]()
+<img width="1557" height="869" alt="스크린샷 2026-03-06 004933" src="https://github.com/user-attachments/assets/13327e23-c9aa-4551-bd3d-40700bb62884" />
+
 
 
 

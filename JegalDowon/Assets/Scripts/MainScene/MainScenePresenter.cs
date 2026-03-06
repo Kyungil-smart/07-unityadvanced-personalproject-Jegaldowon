@@ -1,5 +1,8 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class MainScenePresenter : MonoBehaviour
 {
@@ -37,10 +40,13 @@ public class MainScenePresenter : MonoBehaviour
         _view?.ShowMainMenu();
     }
 
-    //Exit 버튼 클릭 시 호출
+    // Exit 버튼 클릭 시 호출
     public void OnExitClick()
     {
-        Debug.Log("[MainScene] Exit 버튼 클릭");
-        Application.Quit(); // 빌드 시 게임 종료
+#if UNITY_EDITOR
+        EditorApplication.isPlaying = false; // 에디터에서는 재생 모드 종료
+#else
+        Application.Quit(); // 빌드에서는 게임 종료
+#endif
     }
 }

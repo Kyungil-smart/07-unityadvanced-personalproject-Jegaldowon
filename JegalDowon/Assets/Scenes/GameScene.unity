@@ -249,7 +249,7 @@ MonoBehaviour:
   _player: {fileID: 7738907796355571463}
   _animator: {fileID: 0}
   _spriteRenderer: {fileID: 0}
-  _invertFacing: 1
+  _invertFlipX: 1
   _deadAnimDuration: 1
   _showPanelOnDeath: {fileID: 0}
   _groundLayer:
@@ -1703,7 +1703,7 @@ MonoBehaviour:
   _player: {fileID: 7738907796355571463}
   _animator: {fileID: 0}
   _spriteRenderer: {fileID: 0}
-  _invertFacing: 1
+  _invertFlipX: 1
   _deadAnimDuration: 1
   _showPanelOnDeath: {fileID: 0}
   _groundLayer:
@@ -5315,7 +5315,7 @@ MonoBehaviour:
   _player: {fileID: 7738907796355571463}
   _animator: {fileID: 0}
   _spriteRenderer: {fileID: 0}
-  _invertFacing: 1
+  _invertFlipX: 0
   _deadAnimDuration: 1
   _showPanelOnDeath: {fileID: 1750277675}
   _groundLayer:
